@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sonos MP3 Player</title>
+  <style>
+    body{font-family:system-ui,sans-serif;max-width:760px;margin:auto;padding:24px;background:#111;color:#fff}
+    .card{background:#1d1d1d;border-radius:18px;padding:20px;margin:16px 0}
+    button,input{font:inherit} button{padding:12px 16px;border:0;border-radius:12px;cursor:pointer;margin:4px}
+    .track{display:flex;justify-content:space-between;align-items:center;border-top:1px solid #333;padding:12px 0}
+    audio{width:100%;margin-top:12px}
+    small{color:#aaa}
+  </style>
+</head>
+<body>
+  <h1>🔊 Sonos MP3 Player</h1>
+  <div class="card">
+    <h2>MP3 toevoegen</h2>
+    <input id="file" type="file" accept="audio/mpeg,.mp3">
+    <button onclick="upload()">Uploaden</button>
+    <p id="status"><small>Upload je MP3's naar deze lokale speler.</small></p>
+  </div>
+  <div class="card">
+    <h2>Mijn muziek</h2>
+    <div id="tracks">Laden…</div>
+  </div>
+  <div class="card">
+    <h2>Afspelen</h2>
+    <p id="now">Nog niets geselecteerd</p>
+    <audio id="player" controls></audio>
+    <small>De MP3 speelt voorlopig af via het apparaat waarop je deze webapp opent. Sonos Arc-bediening via de Sonos API is de volgende stap.</small>
+  </div>
+<script>
+async function load(){
+  const r=await fetch('/api/tracks'); const tracks=await r.json();
+  const el=document.getElementById('tracks');
+  if(!tracks.length){el.textContent='Nog geen MP3-bestanden.';return;}
+  el.innerHTML=tracks.map((t,i)=>`<div class="track"><span>${i+1}. ${escapeHtml(t.name)}</span><button onclick='play(${JSON.stringify(t)})'>▶️ Afspelen</button></div>`).join('');
+}
+function play(t){const p=document.getElementById('player');p.src=t.url;p.play();document.getElementById('now').textContent=t.name;}
+async function upload(){
+  const f=document.getElementById('file').files[0]; if(!f)return;
+  const fd=new FormData();fd.append('file',f);
+  const r=await fetch('/api/upload',{method:'POST',body:fd});
+  document.getElementById('status').textContent=r.ok?'Upload gelukt!':'Upload mislukt.';load();
+}
+function escapeHtml(s){return s.replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+load();
+</script>
+</body>
+</html>
