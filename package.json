@@ -1,0 +1,14 @@
+{
+  "name": "sonos-mp3-player",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Lokale MP3-speler voor Sonos, met ondersteuning voor de Sonos Arc.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "multer": "^2.0.2"
+  }
+}
